@@ -43,7 +43,7 @@ if __name__ == "__main__":
             )
         ) is not None:
             print(last_page)
-            # 进入商品详情页
+            # 检查商品url
             for ele_button in driver.wait_elements_by_xpath(
                 '//ul/li[@class="newly-added-items__item nomore"]/a'
             ):

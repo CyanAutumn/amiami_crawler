@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, delete
 from sqlalchemy.orm import DeclarativeBase
 from datetime import datetime
@@ -110,7 +111,7 @@ def get_download_task() -> DownloadList:
         with Session(engine) as session:
             data = (
                 session.query(DownloadList)
-                .filter(DownloadList.download_status is False)
+                .filter(DownloadList.download_status == False)
                 .order_by(DownloadList.create_date)
                 .first()
             )
@@ -132,11 +133,16 @@ def del_download_task(task: DownloadList):
 
 def add_commodity_url(commodity_url: str, file_name: str):
     """新增一条下载"""
-    with Session(engine) as session:
-        _ = DownloadList(
-            url=commodity_url,
-            file_name=file_name,
-            create_date=datetime.now(),
-        )
-        session.add(_)
-        session.commit()
+    try:
+        with Session(engine) as session:
+            _ = DownloadList(
+                url=commodity_url,
+                file_name=file_name,
+                create_date=datetime.now(),
+            )
+            session.add(_)
+            session.commit()
+    except IntegrityError as e:
+        print("已在数据库中存在")
+    except Exception as e:
+        raise e

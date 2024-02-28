@@ -3,10 +3,13 @@ import time
 import requests
 from utils.driver import webDriver
 from utils import database
+from utils import flogger
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from apscheduler.schedulers.background import BackgroundScheduler
+
+log = flogger.Flogger().get_logger(__name__)
 
 
 def thread_download_image():
@@ -16,7 +19,7 @@ def thread_download_image():
             if task is None:
                 time.sleep(3)
                 continue
-            print(task.url)
+            log.info(task.url)
             response = requests.get(task.url)
             if response.status_code == 200:
                 with open(f"./temp/{task.file_name}", "wb") as file:
@@ -35,6 +38,9 @@ if __name__ == "__main__":
         scheduler.add_job(thread_download_image, "date", next_run_time=datetime.now())
     scheduler.start()
 
+    # 单纯让下载进程下载完数据库里的下载任务
+    # while True:
+    #     pass
     # 开始抓取
     with webDriver() as driver:
         driver.get(
@@ -46,7 +52,7 @@ if __name__ == "__main__":
                 '//*[@id="__layout"]/div/div[1]/div[2]/div/div/div/div/div[2]/div[4]/p[2]/a[2]'
             )
         ) is not None:
-            print(last_page)
+            log.info(f"最后一次抓取的页面{last_page}")
             # 检查商品url
             for ele_commodity_button in driver.wait_elements_by_xpath(
                 '//ul/li[@class="newly-added-items__item nomore"]/a'
@@ -54,7 +60,7 @@ if __name__ == "__main__":
                 url = ele_commodity_button.get_property("href")
                 commodity_key = url.split("=")[-1]
                 if database.check_commodity_key(commodity_key):
-                    print("商品已被抓取")
+                    log.info("商品已被抓取")
                     continue
 
                 # 图片页

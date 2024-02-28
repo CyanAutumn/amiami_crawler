@@ -10,4 +10,4 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-抓取的成品数据集存放在 https://huggingface.co/datasets/KBlueLeaf/danbooru2023-sqlite/tree/main 将近4万张
+抓取的成品数据集存放在 https://huggingface.co/datasets/CyanAutumn/pvc_amiami_64k
